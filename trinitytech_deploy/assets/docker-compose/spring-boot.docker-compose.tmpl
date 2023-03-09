@@ -1,0 +1,49 @@
+version: '3.9'
+
+networks:
+  proxy:
+    external: true
+
+configs:
+  timezone:
+    external: true
+  localtime:
+    external: true
+
+volumes:
+  data: {}
+
+services:
+  {{ .ServiceName }}:
+    image: {{ .ImageName }}
+    networks:
+      - proxy
+    configs:
+      - source: timezone
+        target: /etc/timezone
+      - source: localtime
+        target: /etc/localtime
+    volumes:
+      - data:/data
+    environment:
+      TZ: Asia/Shanghai
+      {{- with .Env -}}
+        {{- toYaml . | trim | indent 6 | printf "\n%s" -}}
+      {{- end -}}
+    {{- with .Cmd }}
+    command:
+      {{- toYaml . | trim | indent 6 | printf "\n%s" -}}
+    {{- end }}
+    deploy:
+      replicas: 1
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.{{ .ServiceName }}.entrypoints=web, websecure
+        - traefik.http.routers.{{ .ServiceName }}.rule=Host(`{{ .ServiceHost }}`)
+        - traefik.http.routers.{{ .ServiceName }}.tls=true
+        - traefik.http.routers.{{ .ServiceName }}.tls.certresolver=ali
+        - traefik.http.routers.{{ .ServiceName }}.tls.domains[0].main={{ .ServiceHost }}
+        - traefik.http.services.{{ .ServiceName }}.loadbalancer.server.port={{ .ServicePort }}
+        {{- with .Labels }}
+          {{- toYaml . | trim | indent 8 | printf "\n%s" }}
+        {{- end }}
