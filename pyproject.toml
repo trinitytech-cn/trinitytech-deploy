@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "trinitytech-deploy"
+version = "0.1.0"
+description = ""
+authors = ["MuXiu1997 <muxiu1997@gmail.com>"]
+readme = "README.md"
+packages = [{include = "trinitytech_deploy"}]
+include = ["trinitytech_deploy/assets"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
